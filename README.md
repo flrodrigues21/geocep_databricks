@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O principal objetivo é padronizar endereços em datalakes. As funções ajudam a independente do que for cadastrado e de como for cadastrado nas origens, que tendo cep e numero o endereço na dimensão será padronizado. Facilitando assim analises futuras de geolocalização e principalmente resolvendo problemas de qualidade de dados.
+O principal objetivo é padronizar endereços em datalakes. A função ajuda a garantir a qualidade do dado independente de seu sistema origem, facilitando assim analises futuras de geolocalização e principalmente resolvendo problemas de qualidade de dados.
 
 Projeto de Engenharia de Dados, implementado no **Databricks Free** com **Python, SQL, Spark e Delta Lake**. 
 
@@ -23,12 +23,15 @@ O GeoCEP recebe CEP e número de um sistema de origem, consulta **ViaCEP** e **B
 Config/
   api_viaCep.dbquery.ipynb         # Criação da tabela Delta ViaCEP
   api_brasilapi.dbquery.ipynb      # Criação da tabela Delta BrasilAPI
-  Fcn_Logradouro.dbquery.ipynb    # Criação da função tabular SQL
-  dim_endereco.dbquery.ipynb      # Criação da dimensão Delta
+  Fcn_Logradouro.dbquery.ipynb     # Criação da função tabular SQL
+  dim_endereco.dbquery.ipynb       # Criação da dimensão Delta
+DQ/
+  DE_CEP.ipyynb                   # Queries para acompanhar a qualidade dos dados e das chamadas da API
 src/
   01_api_viaCep.ipynb             # Extração / cache ViaCEP
   02_api_brasilapi.ipynb          # Extração / cache BrasilAPI
 Notebooks/
+  Exemplo Uso.ipynb               # Notebooks de exemplo de uso com simulação de endereço e insert na dim_endereco
   Fcn_Logradouro.ipynb            # Consulta e histórico Parquet
   Exemplo Uso.ipynb               # Demonstração JSON, EXPLODE e dimensão
 DQ/
@@ -42,25 +45,16 @@ requirements.txt
 ## Pré-requisitos
 
 - Workspace **Databricks Free**, com notebooks Python e SQL, Spark e acesso ao Unity Catalog.
-- Repositório Git conectado a uma pasta Git do workspace (preferencialmente usando a branch `dev_api` para desenvolvimento).
-- Catálogo `geocep`, schema `default` e volume gerenciado `geocep` existentes.
-- Permissão de criação de tabelas/funções e escrita no caminho `/Volumes/geocep/default/geocep/`.
+- Repositório Git conectado a uma pasta Git do workspace.
 - Acesso HTTP a `viacep.com.br` e `brasilapi.com.br` a partir do notebook.
 
 As duas APIs utilizadas **não exigem chave** nos endpoints deste projeto. Não há credenciais a colocar no código. Caso sejam acrescentadas fontes autenticadas, utilizar variáveis de ambiente ou mecanismo de segredos, nunca versionar tokens.
 
 ## Preparação (uma vez)
 
-1. Abra a pasta Git do projeto no Databricks.
-2. Execute os notebooks SQL de `Config/` para criar, nesta ordem, as tabelas de referência `ref_viacep` e `ref_brasilapi`, a função `Fcn_Logradouro` e a tabela `dim_endereco`.
-3. Confira os objetos com SQL:
-
-```sql
-SHOW TABLES IN geocep.default;
-DESCRIBE FUNCTION EXTENDED geocep.default.Fcn_Logradouro;
-```
-
-4. Confirme que o volume `/Volumes/geocep/default/geocep/` existe antes de salvar arquivos de saída.
+1. Crie o catálogo, schema e volume caso não tenha ainda, sugestão: catalogo `geocep`, schema `default` e volume gerenciado `geocep`.
+2. Abra a pasta Git do projeto no Databricks.
+3. Execute os notebooks SQL de `Config/` para criar, nesta ordem, as tabelas de referência `ref_viacep` e `ref_brasilapi`, a função `Fcn_Logradouro` e a tabela `dim_endereco`.
 
 ## Como executar
 
@@ -141,5 +135,6 @@ O número do imóvel é informado pelo sistema de origem: **o GeoCEP não verifi
 O ambiente de execução é o Databricks Free. A biblioteca Python externa usada diretamente é `requests`; PySpark, `spark` e `dbutils` são disponibilizados pelo runtime Databricks. 
 
 ## Limitações e melhorias futuras
+- Cache atualizado mensal para poucas chamadas a API se necessário.
 
 - Para grande volume: materializar e atualizar semanalmente os CEPs conhecidos, consultar APIs apenas para CEPs ausentes ou vencidos, monitorar limites das APIs e evoluir as validações de qualidade.
