@@ -1,0 +1,6 @@
+# Dependência externa utilizada pelos extratores Python do GeoCEP.
+requests==2.32.3
+
+# PySpark, spark e dbutils são fornecidos pelo runtime do Databricks Free.
+# Não instalar pyspark via pip no notebook sem necessidade.
+# Confirmar se a versão de requests fixada acima é compatível com o runtime utilizado.
